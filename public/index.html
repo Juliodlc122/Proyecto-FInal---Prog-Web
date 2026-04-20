@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loader" class="loader-overlay oculto">
+        <div class="spinner"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fa-solid fa-book-open"></i> Biblioteca Pro
+        </div>
+        <ul class="nav-links">
+            <li><button class="nav-btn active" data-target="view-dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</button></li>
+            <li><button class="nav-btn" data-target="view-list"><i class="fa-solid fa-list"></i> Mis Libros</button></li>
+            <li><button class="nav-btn" data-target="view-add"><i class="fa-solid fa-plus-circle"></i> Añadir</button></li>
+        </ul>
+        <div class="nav-right">
+            <div class="user-badge">
+                <span class="user-name">Julio Ruiz</span>
+                <span class="user-id">2024-2009</span>
+            </div>
+            <button id="themeToggle" class="btn-icon"><i class="fa-solid fa-moon"></i></button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="view-dashboard" class="view active">
+            <h2>Resumen General</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card total">
+                    <i class="fa-solid fa-book"></i>
+                    <div>
+                        <h3>Total</h3>
+                        <span id="kpi-total">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card leidos">
+                    <i class="fa-solid fa-check-double"></i>
+                    <div>
+                        <h3>Leídos</h3>
+                        <span id="kpi-leidos">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card progreso">
+                    <i class="fa-solid fa-spinner"></i>
+                    <div>
+                        <h3>En Progreso</h3>
+                        <span id="kpi-progreso">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card pendientes">
+                    <i class="fa-solid fa-clock"></i>
+                    <div>
+                        <h3>Pendientes</h3>
+                        <span id="kpi-pendientes">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container card">
+                <canvas id="graficoEstados"></canvas>
+            </div>
+        </section>
+
+        <section id="view-list" class="view">
+            <h2>Mi Biblioteca</h2>
+            <div class="toolbar card">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="buscador" placeholder="Buscar por título o autor..." oninput="cargarLibros()">
+                </div>
+                <select id="filtroEstado" onchange="cargarLibros()">
+                    <option value="Todos">Todos los estados</option>
+                    <option value="Leído">Leídos</option>
+                    <option value="Pendiente">Pendientes</option>
+                    <option value="En progreso">En progreso</option>
+                </select>
+            </div>
+            <div id="listaLibros" class="grid-libros"></div>
+        </section>
+
+        <section id="view-add" class="view">
+            <div class="card form-card">
+                <h2 id="form-title">Añadir Nuevo Libro</h2>
+                <form id="libroForm">
+                    <input type="hidden" id="libroId">
+                    <div class="input-group">
+                        <i class="fa-solid fa-heading"></i>
+                        <input type="text" id="titulo" placeholder="Título del libro" required minlength="2">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-user-pen"></i>
+                        <input type="text" id="autor" placeholder="Autor" required minlength="2">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-tags"></i>
+                        <input type="text" id="genero" placeholder="Género">
+                    </div>
+                    <select id="estado" required>
+                        <option value="">-- Estado de lectura --</option>
+                        <option value="Leído">Leído</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En progreso">En progreso</option>
+                    </select>
+                    <div class="input-group">
+                        <i class="fa-solid fa-star"></i>
+                        <input type="number" id="calificacion" placeholder="Calificación (1-5)" min="1" max="5">
+                    </div>
+                    <textarea id="resena" placeholder="Escribe tu reseña u opinión..." rows="4"></textarea>
+                    
+                    <div class="form-actions">
+                        <button type="submit" id="btnGuardar" class="btn-primary"><i class="fa-solid fa-save"></i> Guardar</button>
+                        <button type="button" id="btnCancelar" class="btn-secondary oculto" onclick="cancelarEdicion()"><i class="fa-solid fa-times"></i> Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <div id="modalDetalle" class="modal oculto">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarModal()">&times;</span>
+            <h2 id="modal-titulo"></h2>
+            <p><strong>Autor:</strong> <span id="modal-autor"></span></p>
+            <p><strong>Género:</strong> <span id="modal-genero"></span></p>
+            <p><strong>Estado:</strong> <span id="modal-estado"></span></p>
+            <p><strong>Calificación:</strong> <span id="modal-calificacion"></span></p>
+            <p><strong>Reseña:</strong></p>
+            <div id="modal-resena" class="resena-box"></div>
+            <p style="margin-top: 15px;"><small><strong>Registro:</strong> <span id="modal-fecha"></span></small></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
